@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js" integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>MyShop</title>
+</head>
+<body>
+    <h1>Product List</h1>
+    <form id="productForm" onsubmit="addProduct(event)">
+        <label for="productName">Product Name:</label>
+        <input type="text" id="productName" name="name" required>
+        <br><br>
+        <label for="productPrice">Product Price:</label>
+        <input type="number" id="productPrice" name="price" required>
+        <br><br>
+        <button type="submit">Add Product</button>
+    </form>
+
+    <div id="productList">
+        
+    </div>
+    <div id="AllPrice">
+        <h2> Product are Of worth: </h2>
+    </div>
+    <script>
+        function addProduct(event){
+            event.preventDefault();
+
+            const name = document.querySelector('#productName').value;
+            const price = document.querySelector('#productPrice').value;
+
+            const obj ={
+                name,
+                price
+            }
+            axios.post('http://localhost:8080/add-product', obj)
+            .then((response)=>{
+                console.log(response);
+                showToScreen(response.data.allproduct)
+            })
+            .catch((error) =>{
+                console.log(error);
+            })
+            event.target.reset();
+        }
+        
+        window.addEventListener('DOMContentLoaded', ()=>{
+        axios.get("http://localhost:8080/get-product")
+            .then((response) => {
+              console.log(response);
+              showToScreen(response.data.allproducts);
+            })
+            .catch((error) => {
+              console.log(error);
+            });
+         })
+        
+
+       function showToScreen(products) {
+
+                const Products = document.querySelector('#productList');
+
+                products.forEach((product) => {
+                    const ProductList = document.createElement('li');
+                    ProductList.innerHTML = `
+                    <strong>Product Name: ${product.name}</strong>
+                    <strong> Product Price: ${product.price}</strong>
+                    <button onclick="deleteProduct('${product.id}')">Delete</button>
+                    `;
+                    Products.appendChild(ProductList);
+                });
+         }
+
+         function deleteProduct(id){
+                axios.delete(`http://localhost:8080/delete-product/${id}`)
+                .then((response)=>{
+                    console.log('deleted');
+                })
+                .catch((error)=>{
+                    console.log(error)
+                })
+                removeFromScreen(id);
+            } 
+        
+    </script>
+</body>
+</html>
